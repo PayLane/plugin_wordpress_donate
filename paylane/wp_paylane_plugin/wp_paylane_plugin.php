@@ -258,7 +258,7 @@ function wp_paylane_plugin_shortcodes($attributes)
 {
 	$attributes = shortcode_atts(
 		array(
-			'disabled' => 'enabled'
+			'disabled' => ''
 		), $attributes, 'paylane_plugin' );
 
 	return wp_paylane_plugin_display($attributes);
@@ -532,11 +532,17 @@ function wp_paylane_plugin_display($attributes)
 	$disabled = $attributes['disabled'];
 	$enabled_filter = apply_filters('wp_paylane_enabled_pay_button', -1);
 	if(is_bool($enabled_filter)) {
-		if ( !$enabled_filter ) {
+		if (!$enabled_filter) {
 			$disabled = 'disabled';
 		} else {
-			$disabled = 'enabled';
+			$disabled = '';
 		}
+	}
+
+	if ($disabled === 'disabled') {
+		$disabled = 'disabled="disabled"';
+	} else {
+		$disabled = '';
 	}
 	
 	$was_redirected = false;
@@ -576,7 +582,7 @@ function wp_paylane_plugin_display($attributes)
 			<input type=\"hidden\" name=\"transaction_description\" value=\"" . htmlspecialchars($transaction_description) . "\"/>
 			<input type=\"hidden\" name=\"language\" value=\"en\"/>
 			<input type=\"hidden\" name=\"hash\" value=\"$shash\"/>
-			<input type=\"submit\" class=\"wp_paylane_pay_button\" value=\"$button_text\" disabled=\"$disabled\" />
+			<input type=\"submit\" class=\"wp_paylane_pay_button\" value=\"$button_text\" $disabled />
 		</form></div><br/>";
 	
 	return $output;
