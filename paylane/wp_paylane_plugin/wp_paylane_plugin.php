@@ -256,7 +256,12 @@ function wp_paylane_plugin_options_validate_notification_email($input)
  */
 function wp_paylane_plugin_shortcodes($attributes)
 {
-	return wp_paylane_plugin_display();
+	$attributes = shortcode_atts(
+		array(
+			'disabled' => 'enabled'
+		), $attributes, 'paylane_plugin' );
+
+	return wp_paylane_plugin_display($attributes);
 }
 
 /**
@@ -499,7 +504,7 @@ function wp_paylane_plugin_check_postback_status()
  * 
  * @return string html code
  */
-function wp_paylane_plugin_display()
+function wp_paylane_plugin_display($attributes)
 {
 	$output = "";
 	
@@ -523,6 +528,16 @@ function wp_paylane_plugin_display()
 	$transaction_description = get_option('wp_paylane_plugin_transaction_description');
 	$button_text = get_option('wp_paylane_plugin_button_text');
 	$shash = sha1($hash_salt . "|" . $my_merchant_transaction_id . "|" . $my_amount . "|" . $my_currency_code . "|S");
+
+	$disabled = $attributes['disabled'];
+	$enabled_filter = apply_filters('wp_paylane_enabled_pay_button', -1);
+	if(is_bool($enabled_filter)) {
+		if ( !$enabled_filter ) {
+			$disabled = 'disabled';
+		} else {
+			$disabled = 'enabled';
+		}
+	}
 	
 	$was_redirected = false;
 	$is_successful = false;
@@ -561,7 +576,7 @@ function wp_paylane_plugin_display()
 			<input type=\"hidden\" name=\"transaction_description\" value=\"" . htmlspecialchars($transaction_description) . "\"/>
 			<input type=\"hidden\" name=\"language\" value=\"en\"/>
 			<input type=\"hidden\" name=\"hash\" value=\"$shash\"/>
-			<input type=\"submit\" value=\"$button_text\"/>
+			<input type=\"submit\" class=\"wp_paylane_pay_button\" value=\"$button_text\" disabled=\"$disabled\" />
 		</form></div><br/>";
 	
 	return $output;
